@@ -1,0 +1,19 @@
+name: api_test
+channels:
+  - defaults
+dependencies:
+  - python=3.13
+  - pip
+  - duckdb
+  - python-dotenv
+  - requests
+  - pyyaml
+  - pandas
+  - numpy
+  - pip:
+    - duckdb
+    - python-dotenv
+    - requests
+    - pyyaml
+    - pandas
+    - numpy
