@@ -4,3 +4,6 @@ experiments/
 __pycache__/
 *.pyc
 .vscode/
+instructions/
+ngrok
+ngrok-v3-stable-linux-amd64.tgz

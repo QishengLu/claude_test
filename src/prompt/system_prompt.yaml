@@ -14,26 +14,23 @@ task_description: |
   **Analysis Workflow:**
 
   Step 1: Discover and Understand Data
-  - Use `list_tables_in_directory` to find available parquet files.
-  - Use `get_schema` on ALL files found in the directory AT ONCE.
-  - You MUST pass the complete list of filenames (e.g. `['data/file1.parquet', 'data/file2.parquet', ...]`) to `get_schema` to see all schemas in one go.
+  - Use the `search` tool with query "all" to list available tables/files in the data directory.
+  - Use the `fetch` tool on specific filenames (e.g., `abnormal_logs.parquet`) to get their schema and sample data.
   - *CRITICAL NOTE: The timestamp column in these parquet files is named `time`. Do NOT use `start_time`, `timestamp`, or `date` unless you see them in the schema.*
-  - *CRITICAL NOTE: You MUST strictly follow the schema when writing SQL queries. Do NOT guess column names.*
 
   Step 2: Read Summary Hints (Mandatory)
-  - You MUST query `conclusion.parquet` (if available) FIRST to get high-level metrics and potential root cause candidates.
-  - This file contains pre-calculated anomaly scores and latency comparisons.
-  - **Query Example:** `SELECT * FROM conclusion`
+  - Use the `search` tool to execute a SQL query on `conclusion.parquet` (if available).
+  - **Query Example:** `SELECT * FROM 'conclusion.parquet'` (Note: Use the full filename in quotes as the table name).
 
   Step 3: Verify with Raw Data (Critical)
   - Do not trust the conclusion file blindly.
-  - You MUST verify any findings from summary files by querying the raw `abnormal_logs` and `abnormal_traces`.
+  - You MUST verify any findings from summary files by querying the raw `abnormal_logs.parquet` and `abnormal_traces.parquet`.
   - Extract errors and high latency events specifically within the **Abnormal Period**.
   - **Log Levels:** Be aware that error logs might be labeled as `ERROR`, `SEVERE`, or `FATAL`. Check multiple levels or group by level.
   - **Query Example:**
     ```sql
     SELECT service_name, level, COUNT(*) as count 
-    FROM abnormal_logs 
+    FROM 'abnormal_logs.parquet' 
     WHERE time >= TIMESTAMP '2025-07-23 14:10:23' 
       AND time <= TIMESTAMP '2025-07-23 14:14:23'
     GROUP BY service_name, level 
@@ -42,13 +39,13 @@ task_description: |
     ```
 
   Step 4: Compare with Normal Data (Focus on Normal Period)
-  - You MUST execute SQL queries on `normal_logs` to establish a baseline.
+  - You MUST execute SQL queries on `normal_logs.parquet` to establish a baseline.
   - Compare error counts and latency distributions between Normal and Abnormal periods.
   - Ensure you compare the same log levels (e.g., `ERROR` or `SEVERE`) as found in the abnormal period.
   - **Query Example:**
     ```sql
     SELECT service_name, level, COUNT(*) as error_count 
-    FROM normal_logs 
+    FROM 'normal_logs.parquet' 
     WHERE level IN ('ERROR', 'SEVERE', 'FATAL')
       AND time >= TIMESTAMP '2025-07-23 14:06:23' 
       AND time < TIMESTAMP '2025-07-23 14:10:23'
@@ -72,29 +69,22 @@ task_description: |
   Root cause service: ts-food-service
 
 tools_description: |
-  You have access to the following tools:
-  1. list_tables_in_directory(directory: str) -> str
-     - Lists available parquet files. The files are in the 'data' directory. Always use "data" as the directory argument.
-  2. get_schema(parquet_file: Union[str, List[str]]) -> str
-     - Returns the schema of one or more parquet files.
-     - You can pass a list of filenames to get multiple schemas at once.
-  3. query_parquet_files(parquet_files: Union[str, List[str]], query: str) -> str
-     - Executes a SQL query on the parquet files. 
-     - You can use DuckDB SQL syntax.
-     - Tables are automatically registered as views with their filenames (e.g., 'abnormal_logs.parquet' can be queried as 'abnormal_logs').
-     - IMPORTANT: If a column name contains dots (e.g., `attr.status_code`), you MUST enclose it in double quotes (e.g., `"attr.status_code"`). Do NOT use backticks.
-     - IMPORTANT: Check column names carefully. Use `time` for timestamps, not `start_time`.
+  You have access to a local data server via the following MCP tools:
+
+  1. search(query: str) -> str
+     - **To List Tables:** Pass "all" or a keyword to find relevant parquet files.
+     - **To Execute SQL:** Pass a valid SQL SELECT statement (e.g., "SELECT * FROM 'file.parquet' LIMIT 5").
+       - The server uses DuckDB.
+       - You MUST use the full filename (e.g., 'abnormal_logs.parquet') as the table name in your FROM clause, enclosed in single quotes.
+       - IMPORTANT: If a column name contains dots (e.g., `attr.status_code`), you MUST enclose it in double quotes (e.g., `"attr.status_code"`).
+
+  2. fetch(id: str) -> str
+     - Pass the filename (id) to get the schema and sample data (first 10 rows) of that file.
 
 protocol: |
   Protocol:
   1. Think step-by-step.
-  2. Output your thought process.
-  3. If you need to use a tool, output a JSON block like:
-     ```json
-     {
-         "tool": "tool_name",
-         "args": { ... }
-     }
-     ```
+  2. Use the `search` tool to explore data and run SQL queries.
+  3. Use the `fetch` tool to inspect file schemas.
   4. If you have found the root cause, output the final answer in the format:
      Root cause service: [service-name]

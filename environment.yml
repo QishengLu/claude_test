@@ -1,4 +1,4 @@
-name: api_test
+name: openai_test
 channels:
   - defaults
 dependencies:
@@ -11,6 +11,10 @@ dependencies:
   - pandas
   - numpy
   - pip:
+    - openai>=1.0.0
+    - fastapi
+    - fastmcp
+    - uvicorn
     - duckdb
     - python-dotenv
     - requests

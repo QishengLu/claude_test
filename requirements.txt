@@ -11,16 +11,20 @@ mkl_fft
 mkl_random
 numexpr
 numpy
+openai>=1.0.0
+fastapi
+fastmcp
+uvicorn
 pandas
 pycparser
 PySocks
 python-dateutil
 python-dotenv
 pytz
-PyYAML==6.0.3
-requests @ file:///home/task_176235918788486/conda-bld/requests_1762359591632/work
-setuptools==80.9.0
-six @ file:///croot/six_1744271502820/work
-tzdata @ file:///croot/python-tzdata_1746123641790/work
-urllib3 @ file:///croot/urllib3_1750775463400/work
-wheel==0.45.1
+PyYAML
+requests
+setuptools
+six
+tzdata
+urllib3
+wheel
