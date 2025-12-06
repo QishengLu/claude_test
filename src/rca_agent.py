@@ -216,7 +216,7 @@ Example: SELECT service_name, "attr.status_code" FROM abnormal_logs WHERE level 
         except Exception as e:
             print(f"\n[System] Error saving history: {e}")
 
-    def run(self, max_iterations: int = 30):
+    def run(self, max_iterations: int = 30, output_path: str = "experiments/claude/output.json"):
         """
         Run the RCA Agent with Claude's extended thinking mode via OpenRouter.
         """
@@ -326,7 +326,7 @@ Example: SELECT service_name, "attr.status_code" FROM abnormal_logs WHERE level 
             traceback.print_exc()
         
         # Save history
-        self.save_history()
+        self.save_history(output_path)
         print("\n[System] RCA Agent completed.")
 
 
