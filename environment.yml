@@ -1,4 +1,4 @@
-name: openai_test
+name: claude_test
 channels:
   - defaults
 dependencies:
