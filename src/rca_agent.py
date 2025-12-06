@@ -3,6 +3,7 @@ import os
 import sys
 import time
 import requests
+import argparse
 from typing import List, Dict, Any, Optional
 from pathlib import Path
 from dotenv import load_dotenv
@@ -331,5 +332,10 @@ Example: SELECT service_name, "attr.status_code" FROM abnormal_logs WHERE level 
 
 
 if __name__ == "__main__":
-    agent = RCAAgent()
-    agent.run()
+    parser = argparse.ArgumentParser(description="RCA Agent")
+    parser.add_argument("--data_dir", type=str, default="data", help="Directory containing data files")
+    parser.add_argument("--output_path", type=str, default="experiments/claude/output.json", help="Path to save output JSON")
+    args = parser.parse_args()
+
+    agent = RCAAgent(data_dir=args.data_dir)
+    agent.run(output_path=args.output_path)
